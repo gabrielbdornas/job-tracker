@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { deleteApplication } from "@/app/(tracker)/applications/actions";
 import { ApplicationForm } from "@/components/tracker/application-form";
 import { DeleteButton } from "@/components/tracker/delete-button";
+import { PageHeader, Panel } from "@/components/tracker/panel";
 import { StatusBadge } from "@/components/tracker/status-badge";
 import { TaskForm } from "@/components/tracker/task-form";
 import { TaskList } from "@/components/tracker/task-list";
@@ -17,10 +18,18 @@ export default function ApplicationPage({
 }) {
   return (
     <>
-      <Link href="/applications" className="text-sm hover:underline">
-        ← All applications
-      </Link>
-      <Suspense fallback={<p className="text-sm">Loading application...</p>}>
+      <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
+        <Link href="/applications" className="hover:text-foreground">
+          Applications
+        </Link>
+        <span className="mx-2">/</span>
+        <span className="text-foreground">Details</span>
+      </nav>
+      <Suspense
+        fallback={
+          <p className="text-sm text-muted-foreground">Loading application...</p>
+        }
+      >
         <ApplicationDetail params={params} />
       </Suspense>
     </>
@@ -67,31 +76,38 @@ async function ApplicationDetail({
 
   return (
     <>
-      <section className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="font-bold text-2xl">
-            {application.company} — {application.position}
-          </h1>
-          <StatusBadge status={application.status} />
-        </div>
+      <PageHeader
+        title={application.company}
+        description={application.position}
+      >
+        <StatusBadge status={application.status} />
+      </PageHeader>
+      <Panel title="Details" description="Edit and save this application.">
         <ApplicationForm application={application} />
+      </Panel>
+      <Panel title="Tasks" description="Follow-ups for this application.">
+        <div className="flex flex-col gap-4">
+          {tasksResult.error ? (
+            <p role="alert" className="text-sm text-red-500">
+              Could not load tasks: {tasksResult.error.message}
+            </p>
+          ) : (
+            <TaskList tasks={tasksResult.data} />
+          )}
+          <TaskForm applicationId={application.id} />
+        </div>
+      </Panel>
+      <Panel
+        danger
+        title="Danger zone"
+        description="Deleting an application also deletes all of its tasks."
+      >
         <DeleteButton
           action={deleteApplication.bind(null, application.id)}
           confirmText={`Delete the application to ${application.company} and all its tasks?`}
           label="Delete application"
         />
-      </section>
-      <section className="flex flex-col gap-4">
-        <h2 className="font-semibold text-xl">Tasks</h2>
-        {tasksResult.error ? (
-          <p role="alert" className="text-sm text-red-500">
-            Could not load tasks: {tasksResult.error.message}
-          </p>
-        ) : (
-          <TaskList tasks={tasksResult.data} />
-        )}
-        <TaskForm applicationId={application.id} />
-      </section>
+      </Panel>
     </>
   );
 }

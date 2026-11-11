@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { PageHeader, Panel } from "@/components/tracker/panel";
 import { TaskForm } from "@/components/tracker/task-form";
 import { TaskList } from "@/components/tracker/task-list";
 import { createClient } from "@/lib/supabase/server";
@@ -6,12 +7,17 @@ import type { Application, TaskWithApplication } from "@/lib/types";
 
 export default function TasksPage() {
   return (
-    <section className="flex flex-col gap-4">
-      <h1 className="font-bold text-2xl">Tasks</h1>
-      <Suspense fallback={<p className="text-sm">Loading tasks...</p>}>
+    <>
+      <PageHeader
+        title="Tasks"
+        description="Follow-ups across all your applications. Open tasks first."
+      />
+      <Suspense
+        fallback={<p className="text-sm text-muted-foreground">Loading tasks...</p>}
+      >
         <TasksContent />
       </Suspense>
-    </section>
+    </>
   );
 }
 
@@ -44,8 +50,9 @@ async function TasksContent() {
   return (
     <>
       <TaskList tasks={tasksResult.data ?? []} showApplication />
-      <h2 className="font-semibold text-xl mt-6">Add task</h2>
-      <TaskForm applications={applicationsResult.data ?? []} />
+      <Panel title="Add task" description="Attach a follow-up to one of your applications.">
+        <TaskForm applications={applicationsResult.data ?? []} />
+      </Panel>
     </>
   );
 }

@@ -1,23 +1,36 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { ApplicationForm } from "@/components/tracker/application-form";
+import { PageHeader, Panel } from "@/components/tracker/panel";
 import { StatusBadge } from "@/components/tracker/status-badge";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import type { Application } from "@/lib/types";
 
 export default function ApplicationsPage() {
   return (
     <>
-      <section className="flex flex-col gap-4">
-        <h1 className="font-bold text-2xl">Applications</h1>
-        <Suspense fallback={<p className="text-sm">Loading applications...</p>}>
-          <ApplicationsTable />
-        </Suspense>
-      </section>
-      <section className="flex flex-col gap-4">
-        <h2 className="font-semibold text-xl">Add application</h2>
+      <PageHeader
+        title="Applications"
+        description="Every job you have applied to, newest first."
+      >
+        <Button asChild size="sm">
+          <a href="#new-application">New application</a>
+        </Button>
+      </PageHeader>
+      <Suspense
+        fallback={
+          <p className="text-sm text-muted-foreground">Loading applications...</p>
+        }
+      >
+        <ApplicationsTable />
+      </Suspense>
+      <Panel
+        title={<span id="new-application">Add application</span>}
+        description="It is saved to your account only."
+      >
         <ApplicationForm />
-      </section>
+      </Panel>
     </>
   );
 }
@@ -40,39 +53,41 @@ async function ApplicationsTable() {
   }
   if (!data.length) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
         No applications yet. Add your first one below.
-      </p>
+      </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-md border">
+    <div className="overflow-x-auto rounded-md border bg-card shadow-sm">
       <table className="w-full text-sm">
-        <thead className="bg-muted/50 text-left">
+        <thead className="border-b bg-muted/60 text-left text-xs uppercase tracking-wider text-muted-foreground">
           <tr>
-            <th className="p-3 font-medium">Company</th>
-            <th className="p-3 font-medium">Position</th>
-            <th className="p-3 font-medium">Status</th>
-            <th className="p-3 font-medium">Applied on</th>
+            <th className="px-4 py-2 font-normal">Company</th>
+            <th className="px-4 py-2 font-normal">Position</th>
+            <th className="px-4 py-2 font-normal">Status</th>
+            <th className="px-4 py-2 font-normal">Applied on</th>
           </tr>
         </thead>
         <tbody className="divide-y">
           {data.map((a) => (
-            <tr key={a.id} className="hover:bg-muted/30">
-              <td className="p-3">
+            <tr key={a.id} className="transition-colors hover:bg-accent/50">
+              <td className="px-4 py-2.5">
                 <Link
                   href={`/applications/${a.id}`}
-                  className="font-medium underline underline-offset-2"
+                  className="font-medium hover:text-brand"
                 >
                   {a.company}
                 </Link>
               </td>
-              <td className="p-3">{a.position}</td>
-              <td className="p-3">
+              <td className="px-4 py-2.5 text-muted-foreground">{a.position}</td>
+              <td className="px-4 py-2.5">
                 <StatusBadge status={a.status} />
               </td>
-              <td className="p-3">{a.applied_on ?? "—"}</td>
+              <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">
+                {a.applied_on ?? "—"}
+              </td>
             </tr>
           ))}
         </tbody>

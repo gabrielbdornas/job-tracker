@@ -28,7 +28,7 @@ export function TaskList({
   }
 
   return (
-    <ul className="divide-y rounded-md border">
+    <ul className="divide-y rounded-md border bg-card shadow-sm">
       {tasks.map((task) => (
         <TaskRow key={task.id} task={task} showApplication={showApplication} />
       ))}
@@ -50,10 +50,12 @@ function TaskRow({
     null,
   );
   const application = "applications" in task ? task.applications : null;
+  const overdue =
+    !task.done && !!task.due_date && task.due_date < localToday();
 
   if (editing) {
     return (
-      <li className="p-3">
+      <li className="px-4 py-2.5">
         <EditTaskForm
           task={task}
           onDone={(result) => {
@@ -66,32 +68,47 @@ function TaskRow({
   }
 
   return (
-    <li className="flex flex-wrap items-center gap-3 p-3">
+    <li className="flex flex-wrap items-center gap-3 px-4 py-2.5 transition-colors hover:bg-accent/50">
       <form action={toggleAction}>
         <button
           type="submit"
           disabled={toggling}
           aria-label={task.done ? "Mark as not done" : "Mark as done"}
           className={cn(
-            "flex h-4 w-4 items-center justify-center rounded-sm border border-primary text-xs disabled:opacity-50",
-            task.done && "bg-primary text-primary-foreground",
+            "flex h-4 w-4 items-center justify-center rounded-sm border border-muted-foreground/60 text-[10px] leading-none hover:border-brand disabled:opacity-50",
+            task.done && "border-brand bg-brand text-black",
           )}
         >
           {task.done ? "✓" : ""}
         </button>
       </form>
       <div className="flex-1 min-w-40">
-        <p className={cn(task.done && "line-through text-muted-foreground")}>
+        <p
+          className={cn(
+            "text-sm",
+            task.done && "line-through text-muted-foreground",
+          )}
+        >
           {task.title}
         </p>
         <p className="text-xs text-muted-foreground">
-          {task.due_date ? `Due ${task.due_date}` : "No due date"}
+          <span
+            suppressHydrationWarning
+            className={cn(
+              "font-mono",
+              overdue && "text-red-600 dark:text-red-400",
+            )}
+          >
+            {task.due_date
+              ? `${overdue ? "Overdue" : "Due"} ${task.due_date}`
+              : "No due date"}
+          </span>
           {showApplication && application && (
             <>
               {" · "}
               <Link
                 href={`/applications/${task.application_id}`}
-                className="underline underline-offset-2"
+                className="hover:text-brand"
               >
                 {application.company} — {application.position}
               </Link>
@@ -169,4 +186,11 @@ function EditTaskForm({
       </div>
     </form>
   );
+}
+
+// Today's date as YYYY-MM-DD in the viewer's time zone, to compare with due dates.
+function localToday() {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }

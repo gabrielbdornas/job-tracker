@@ -1,5 +1,6 @@
-import { AuthButton } from "@/components/auth-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { NavLinks } from "@/components/tracker/nav-links";
+import { UserNav } from "@/components/tracker/user-nav";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -9,35 +10,38 @@ export default function TrackerLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-screen flex flex-col items-center">
-      <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-        <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-          <div className="flex gap-5 items-center font-semibold">
-            <Link href="/applications">Job Tracker</Link>
+    <div className="min-h-screen flex flex-col">
+      <nav className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
+        <div className="mx-auto flex h-12 max-w-6xl items-center justify-between gap-3 px-4">
+          <div className="flex items-center gap-4">
             <Link
               href="/applications"
-              className="font-normal hover:underline underline-offset-4"
+              className="flex items-center gap-2 text-sm font-medium"
             >
-              Applications
+              <span
+                className="flex h-6 w-6 items-center justify-center rounded-md border border-brand/40 bg-brand/15 text-xs font-semibold text-brand"
+                aria-hidden
+              >
+                JT
+              </span>
+              <span className="hidden sm:inline">Job Tracker</span>
             </Link>
-            <Link
-              href="/tasks"
-              className="font-normal hover:underline underline-offset-4"
-            >
-              Tasks
-            </Link>
+            <span className="h-5 w-px bg-border" aria-hidden />
+            <Suspense>
+              <NavLinks />
+            </Suspense>
           </div>
-          <Suspense>
-            <AuthButton />
-          </Suspense>
+          <div className="flex items-center gap-1">
+            <ThemeSwitcher />
+            <Suspense>
+              <UserNav />
+            </Suspense>
+          </div>
         </div>
       </nav>
-      <div className="flex-1 w-full max-w-5xl flex flex-col gap-10 p-5">
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8">
         {children}
-      </div>
-      <footer className="w-full flex items-center justify-center border-t text-xs py-8">
-        <ThemeSwitcher />
-      </footer>
-    </main>
+      </main>
+    </div>
   );
 }
