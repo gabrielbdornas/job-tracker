@@ -1,4 +1,5 @@
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { LogoMark } from "@/components/tracker/logo";
 import { NavLinks } from "@/components/tracker/nav-links";
 import { UserNav } from "@/components/tracker/user-nav";
 import Link from "next/link";
@@ -18,12 +19,7 @@ export default function TrackerLayout({
               href="/applications"
               className="flex items-center gap-2 text-sm font-medium"
             >
-              <span
-                className="flex h-6 w-6 items-center justify-center rounded-md border border-brand/40 bg-brand/15 text-xs font-semibold text-brand"
-                aria-hidden
-              >
-                JT
-              </span>
+              <LogoMark />
               <span className="hidden sm:inline">Job Tracker</span>
             </Link>
             <span className="h-5 w-px bg-border" aria-hidden />

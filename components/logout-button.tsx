@@ -10,7 +10,9 @@ export function LogoutButton(props: Omit<ButtonProps, "onClick">) {
   const logout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/auth/login");
+    router.push("/");
+    // Re-render server components so the home page shows signed-out actions.
+    router.refresh();
   };
 
   return (
