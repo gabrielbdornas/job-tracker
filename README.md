@@ -99,6 +99,33 @@ Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` can b
 
 > Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
 
+## Database
+
+The schema lives in `supabase/migrations/` and is applied with the Supabase CLI
+(installed as a dev dependency, so use `npx supabase`).
+
+One-time setup (interactive; credentials are stored by the CLI, not in this repo):
+
+```bash
+npx supabase login
+npx supabase link --project-ref <your-project-ref>   # asks for the database password
+```
+
+Apply migrations and check their status:
+
+```bash
+npm run db:push     # runs any migrations not yet applied to the linked project
+npm run db:status   # lists local vs. applied migrations
+```
+
+To change the schema, create a new migration instead of editing an old one:
+
+```bash
+npm run db:new add_some_column   # creates supabase/migrations/<timestamp>_add_some_column.sql
+# write the SQL in that file, then:
+npm run db:push
+```
+
 ## Feedback and issues
 
 Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
