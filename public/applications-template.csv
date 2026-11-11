@@ -1,0 +1,3 @@
+company,position,status,applied_on,notes
+Example Corp,Frontend Developer,applied,2026-11-01,Found on LinkedIn
+"Acme, Inc.",Backend Engineer,interviewing,15/10/2026,"Notes with a comma, inside quotes"

@@ -11,6 +11,12 @@ import {
 } from "@/lib/actions-helpers";
 import { VIEW_COOKIE } from "@/lib/applications-view";
 import {
+  MAX_CSV_BYTES,
+  duplicateKey,
+  parseApplicationsCsv,
+  type ImportError,
+} from "@/lib/csv-import";
+import {
   STATUSES,
   VIEWS,
   type ActionState,
@@ -143,4 +149,80 @@ export async function setApplicationsView(view: ApplicationsView) {
     sameSite: "lax",
   });
   refresh();
+}
+
+export type ImportResult = {
+  ok: boolean;
+  message: string;
+  imported: number;
+  duplicates: number;
+  errors: ImportError[];
+};
+
+// Imports applications from CSV text. Invalid rows and rows matching an
+// existing application (same company and position) are skipped.
+export async function importApplications(csv: string): Promise<ImportResult> {
+  const fail = (message: string, errors: ImportError[] = []) => ({
+    ok: false,
+    message,
+    imported: 0,
+    duplicates: 0,
+    errors,
+  });
+
+  const supabase = await getAuthedClient();
+  if (!supabase) return fail(notSignedIn.message);
+  if (new Blob([csv]).size > MAX_CSV_BYTES) {
+    return fail("The file is too large (max 500 KB).");
+  }
+
+  const { rows, errors, fatal } = parseApplicationsCsv(csv);
+  if (fatal) return fail(fatal);
+
+  const { data: existing, error: readError } = await supabase
+    .from("applications")
+    .select("company, position");
+  if (readError) {
+    return fail(`Could not check for duplicates: ${readError.message}`, errors);
+  }
+
+  const seen = new Set(existing.map((a) => duplicateKey(a.company, a.position)));
+  const toInsert = [];
+  let duplicates = 0;
+  for (const row of rows) {
+    const key = duplicateKey(row.company, row.position);
+    if (seen.has(key)) {
+      duplicates++;
+      continue;
+    }
+    seen.add(key);
+    toInsert.push({
+      company: row.company,
+      position: row.position,
+      status: row.status,
+      applied_on: row.applied_on,
+      notes: row.notes,
+    });
+  }
+
+  if (toInsert.length) {
+    // user_id is filled in by the database from the signed-in user.
+    const { error } = await supabase.from("applications").insert(toInsert);
+    if (error) return fail(`Could not import: ${error.message}`, errors);
+    refresh();
+  }
+
+  const parts = [
+    `Imported ${toInsert.length} application${toInsert.length === 1 ? "" : "s"}.`,
+  ];
+  if (duplicates) parts.push(`${duplicates} duplicate${duplicates === 1 ? "" : "s"} skipped.`);
+  if (errors.length) parts.push(`${errors.length} invalid row${errors.length === 1 ? "" : "s"} skipped.`);
+
+  return {
+    ok: toInsert.length > 0 || (duplicates > 0 && !errors.length),
+    message: parts.join(" "),
+    imported: toInsert.length,
+    duplicates,
+    errors,
+  };
 }

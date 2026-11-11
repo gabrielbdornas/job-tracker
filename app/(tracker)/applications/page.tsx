@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { ApplicationForm } from "@/components/tracker/application-form";
+import { ImportApplications } from "@/components/tracker/import-applications";
 import { KanbanBoard } from "@/components/tracker/kanban-board";
 import { PageHeader, Panel } from "@/components/tracker/panel";
 import { StatusBadge } from "@/components/tracker/status-badge";
@@ -21,6 +22,7 @@ export default function ApplicationsPage() {
           <Suspense>
             <CurrentViewToggle />
           </Suspense>
+          <ImportApplications />
           <Button asChild size="sm">
             <a href="#new-application">New application</a>
           </Button>
