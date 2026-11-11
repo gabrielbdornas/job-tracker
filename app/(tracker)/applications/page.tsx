@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { ApplicationForm } from "@/components/tracker/application-form";
+import { KanbanBoard } from "@/components/tracker/kanban-board";
 import { PageHeader, Panel } from "@/components/tracker/panel";
 import { StatusBadge } from "@/components/tracker/status-badge";
+import { ViewToggle } from "@/components/tracker/view-toggle";
 import { Button } from "@/components/ui/button";
+import { getApplicationsView } from "@/lib/applications-view";
 import { createClient } from "@/lib/supabase/server";
 import type { Application } from "@/lib/types";
 
@@ -14,16 +17,21 @@ export default function ApplicationsPage() {
         title="Applications"
         description="Every job you have applied to, newest first."
       >
-        <Button asChild size="sm">
-          <a href="#new-application">New application</a>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Suspense>
+            <CurrentViewToggle />
+          </Suspense>
+          <Button asChild size="sm">
+            <a href="#new-application">New application</a>
+          </Button>
+        </div>
       </PageHeader>
       <Suspense
         fallback={
           <p className="text-sm text-muted-foreground">Loading applications...</p>
         }
       >
-        <ApplicationsTable />
+        <Applications />
       </Suspense>
       <Panel
         title={<span id="new-application">Add application</span>}
@@ -35,7 +43,12 @@ export default function ApplicationsPage() {
   );
 }
 
-async function ApplicationsTable() {
+async function CurrentViewToggle() {
+  return <ViewToggle current={await getApplicationsView()} />;
+}
+
+async function Applications() {
+  const view = await getApplicationsView();
   const supabase = await createClient();
   // Row Level Security makes this return only the signed-in user's rows.
   const { data, error } = await supabase
@@ -58,6 +71,8 @@ async function ApplicationsTable() {
       </div>
     );
   }
+
+  if (view === "kanban") return <KanbanBoard applications={data} />;
 
   return (
     <div className="overflow-x-auto rounded-md border bg-card shadow-sm">

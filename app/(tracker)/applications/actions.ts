@@ -1,6 +1,7 @@
 "use server";
 
 import { refresh } from "next/cache";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   fieldsOf,
@@ -8,7 +9,14 @@ import {
   notSignedIn,
   text,
 } from "@/lib/actions-helpers";
-import { STATUSES, type ActionState, type Status } from "@/lib/types";
+import { VIEW_COOKIE } from "@/lib/applications-view";
+import {
+  STATUSES,
+  VIEWS,
+  type ActionState,
+  type ApplicationsView,
+  type Status,
+} from "@/lib/types";
 
 const FIELDS = ["company", "position", "status", "applied_on", "notes"];
 
@@ -102,4 +110,37 @@ export async function deleteApplication(id: string): Promise<ActionState> {
   if (!data?.length) return { ok: false, message: "Application not found." };
 
   redirect("/applications");
+}
+
+// Used by the Kanban board when a card is dropped on another column.
+export async function setApplicationStatus(
+  id: string,
+  status: Status,
+): Promise<ActionState> {
+  const supabase = await getAuthedClient();
+  if (!supabase) return notSignedIn;
+  if (!STATUSES.includes(status)) {
+    return { ok: false, message: "Pick a valid status." };
+  }
+
+  const { data, error } = await supabase
+    .from("applications")
+    .update({ status })
+    .eq("id", id)
+    .select("id");
+  if (error) return { ok: false, message: `Could not move: ${error.message}` };
+  if (!data?.length) return { ok: false, message: "Application not found." };
+
+  refresh();
+  return { ok: true, message: `Moved to ${status}.` };
+}
+
+export async function setApplicationsView(view: ApplicationsView) {
+  if (!VIEWS.includes(view)) return;
+  (await cookies()).set(VIEW_COOKIE, view, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+  });
+  refresh();
 }

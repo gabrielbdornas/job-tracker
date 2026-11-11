@@ -2,6 +2,10 @@ export const STATUSES = ["applied", "interviewing", "offer", "rejected"] as cons
 
 export type Status = (typeof STATUSES)[number];
 
+export const VIEWS = ["table", "kanban"] as const;
+
+export type ApplicationsView = (typeof VIEWS)[number];
+
 export type Application = {
   id: string;
   company: string;
