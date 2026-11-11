@@ -7,7 +7,8 @@
     "lint": "eslint .",
     "db:new": "supabase migration new",
     "db:push": "supabase db push --remote",
-    "db:status": "supabase migration list --remote"
+    "db:status": "supabase migration list --remote",
+    "db:seed": "supabase db push --remote --include-seed"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.1",

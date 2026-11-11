@@ -116,6 +116,7 @@ Apply migrations and check their status:
 ```bash
 npm run db:push     # runs any migrations not yet applied to the linked project
 npm run db:status   # lists local vs. applied migrations
+npm run db:seed     # adds sample data from supabase/seed.sql to every existing account
 ```
 
 To change the schema, create a new migration instead of editing an old one:
