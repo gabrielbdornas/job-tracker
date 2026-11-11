@@ -16,7 +16,7 @@ export default function TrackerLayout({
         <div className="mx-auto flex h-12 max-w-6xl items-center justify-between gap-3 px-4">
           <div className="flex items-center gap-4">
             <Link
-              href="/applications"
+              href="/dashboard"
               className="flex items-center gap-2 text-sm font-medium"
             >
               <LogoMark />

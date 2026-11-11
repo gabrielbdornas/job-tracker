@@ -31,7 +31,7 @@ Supabase CLI notes (v3, dev dependency, run via `npx supabase`):
 
 Job Tracker built on the Next.js + Supabase starter: users track job **applications** and follow-up **tasks** (each task belongs to one application).
 
-**Auth (from the starter; don't restructure).** `proxy.ts` → `lib/supabase/proxy.ts` refreshes the session on every request and redirects signed-out users to `/auth/login` for any path except `/` and `/auth/*`. So new pages are protected automatically. Log-in forms in `components/*-form.tsx` push to `/protected`, which `next.config.ts` redirects to `/applications`.
+**Auth (from the starter; don't restructure).** `proxy.ts` → `lib/supabase/proxy.ts` refreshes the session on every request and redirects signed-out users to `/auth/login` for any path except `/` and `/auth/*`. So new pages are protected automatically. Log-in forms in `components/*-form.tsx` push to `/protected`, which `next.config.ts` redirects to `/dashboard`.
 
 **Data isolation is enforced in the database, not the app.** `supabase/migrations/` creates `applications` and `tasks` with RLS policies restricting every operation to `user_id = auth.uid()`; task insert/update also require the parent application to belong to the same user. `user_id` defaults to `auth.uid()`, so app code never sets it. Queries therefore don't filter by user — RLS does. Server code uses `lib/supabase/server.ts` (publishable key + user cookies), never a service-role key.
 

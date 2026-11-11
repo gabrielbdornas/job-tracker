@@ -50,7 +50,7 @@ export function SignUpForm({
       if (error) throw error;
       // With email confirmation off, the user is signed in right away;
       // otherwise they must confirm their email first.
-      router.push(data.session ? "/applications" : "/auth/sign-up-success");
+      router.push(data.session ? "/dashboard" : "/auth/sign-up-success");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

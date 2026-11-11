@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   // The login form sends users to /protected after signing in.
   async redirects() {
     return [
-      { source: "/protected", destination: "/applications", permanent: false },
+      { source: "/protected", destination: "/dashboard", permanent: false },
     ];
   },
 };

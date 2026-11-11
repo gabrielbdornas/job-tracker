@@ -81,7 +81,7 @@ async function Actions({ size = "sm" }: { size?: Size }) {
   if (data?.claims) {
     return (
       <Button asChild size={size}>
-        <Link href="/applications">Open Job Tracker</Link>
+        <Link href="/dashboard">Open Job Tracker</Link>
       </Button>
     );
   }
